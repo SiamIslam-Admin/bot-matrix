@@ -1,0 +1,7 @@
+{
+  "name": "BOT MATRIX",
+  "description": "High-Performance Telegram Bot Cluster & Bot Management Matrix Platform featuring live analytics, bot monitoring, activity telemetry, and dark/light mode.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

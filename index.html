@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function() {
+        // Safe console.error filtering for Ace basePath inference notice
+        try {
+          if (typeof console !== 'undefined' && console.error) {
+            var origConsoleError = console.error;
+            console.error = function() {
+              var str = '';
+              for (var i = 0; i < arguments.length; i++) {
+                str += ' ' + String(arguments[i]);
+              }
+              if (str.indexOf('Unable to infer path to ace') !== -1) {
+                return;
+              }
+              return origConsoleError.apply(console, arguments);
+            };
+          }
+        } catch (_) {}
+
+        // Safe Object.defineProperty interceptor to prevent extension collision crashes (e.g. MetaMask / web3 wallets redefining window.ethereum)
+        try {
+          var origDefineProperty = Object.defineProperty;
+          Object.defineProperty = function(obj, prop, descriptor) {
+            try {
+              return origDefineProperty.call(Object, obj, prop, descriptor);
+            } catch (err) {
+              if (
+                (prop === 'ethereum' || String(err && err.message).indexOf('Cannot redefine property') !== -1)
+              ) {
+                try {
+                  if (obj && descriptor && 'value' in descriptor) {
+                    obj[prop] = descriptor.value;
+                  }
+                } catch (_) {}
+                return obj;
+              }
+              throw err;
+            }
+          };
+        } catch (_) {}
+
+        // Global window.onerror suppressor for extension injection & cross-origin noise
+        try {
+          var prevOnError = window.onerror;
+          window.onerror = function(msg, url, line, col, error) {
+            var str = String(msg || '');
+            if (
+              str.indexOf('ethereum') !== -1 ||
+              str.indexOf('getLine') !== -1 ||
+              str === 'Script error.' ||
+              str.indexOf('Script error') !== -1 ||
+              str.indexOf('Unable to infer path to ace') !== -1
+            ) {
+              return true; // suppresses the error report
+            }
+            if (typeof prevOnError === 'function') {
+              return prevOnError.apply(this, arguments);
+            }
+          };
+        } catch (_) {}
+
+        // Global safe error swallow for browser extension / cross-origin script noise
+        try {
+          window.addEventListener('error', function(e) {
+            var msg = (e && (e.message || (e.error && e.error.message))) || '';
+            var str = String(msg);
+            if (
+              str.indexOf('Cannot redefine property: ethereum') !== -1 ||
+              str.indexOf('ethereum') !== -1 ||
+              str.indexOf('getLine') !== -1 ||
+              str === 'Script error.' ||
+              str.indexOf('Script error') !== -1 ||
+              str.indexOf('Unable to infer path to ace') !== -1
+            ) {
+              if (typeof e.stopImmediatePropagation === 'function') {
+                e.stopImmediatePropagation();
+              }
+              if (typeof e.preventDefault === 'function') {
+                e.preventDefault();
+              }
+              return true;
+            }
+          }, true);
+
+          window.addEventListener('unhandledrejection', function(e) {
+            var msg = (e && (e.reason ? (e.reason.message || String(e.reason)) : '')) || '';
+            var str = String(msg);
+            if (
+              str.indexOf('ethereum') !== -1 ||
+              str.indexOf('getLine') !== -1 ||
+              str === 'Script error.' ||
+              str.indexOf('Script error') !== -1 ||
+              str.indexOf('Unable to infer path to ace') !== -1
+            ) {
+              if (typeof e.stopImmediatePropagation === 'function') {
+                e.stopImmediatePropagation();
+              }
+              if (typeof e.preventDefault === 'function') {
+                e.preventDefault();
+              }
+            }
+          }, true);
+        } catch (_) {}
+
+        try {
+          var originalFetch = typeof window !== 'undefined' && window.fetch ? window.fetch.bind(window) : undefined;
+          var activeFetch = originalFetch;
+
+          Object.defineProperty(window, 'fetch', {
+            get: function() {
+              return activeFetch || originalFetch;
+            },
+            set: function(newFetch) {
+              activeFetch = newFetch;
+            },
+            configurable: true,
+            enumerable: true
+          });
+
+          if (typeof globalThis !== 'undefined' && globalThis !== window) {
+            try {
+              Object.defineProperty(globalThis, 'fetch', {
+                get: function() {
+                  return activeFetch || originalFetch;
+                },
+                set: function(newFetch) {
+                  activeFetch = newFetch;
+                },
+                configurable: true,
+                enumerable: true
+              });
+            } catch (_) {}
+          }
+        } catch (e) {
+          // Ignore
+        }
+      })();
+    </script>
+    <title>BOT MATRIX - Telegram Bot Cluster & Management</title>
+    <meta name="description" content="High-Performance Telegram Bot Cluster & Bot Management Matrix Platform featuring live analytics, bot monitoring, activity telemetry, and dark/light mode." />
+    <meta property="og:title" content="BOT MATRIX - Telegram Bot Cluster & Management" />
+    <meta property="og:description" content="High-Performance Telegram Bot Cluster & Bot Management Matrix Platform featuring live analytics, bot monitoring, activity telemetry, and dark/light mode." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body class="font-sans antialiased selection:bg-blue-500 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
